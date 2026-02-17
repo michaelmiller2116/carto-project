@@ -42,7 +42,6 @@ describe('getOrderedSourceLayerPairs', () => {
     }
 
     const pairs = getOrderedSourceLayerPairs(snapshot)
-    // TODO: set second index value back to layer-1 after testing pipeline
-    expect(pairs.map((pair) => pair.layerId)).toEqual(['layer-2', 'layer-derp'])
+    expect(pairs.map((pair) => pair.layerId)).toEqual(['layer-2', 'layer-1'])
   })
 })
