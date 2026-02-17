@@ -7,7 +7,7 @@ import type { WorkflowEdge, WorkflowNode, WorkflowSnapshot } from './workflow/ty
 import WorkflowView from './views/WorkflowView'
 import Mapview from './views/Mapview'
 
-const VIEW_STORAGE_KEY = 'activeView'
+const VIEW_STORAGE_KEY = 'showWorkflowView'
 const WORKFLOW_STORAGE_KEY = 'workflow'
 
 const getInitialView = (): boolean => {
@@ -41,6 +41,11 @@ function App() {
   const [workflowSnapshot, setWorkflowSnapshot] = useState<WorkflowSnapshot>(
     getInitialWorkflowSnapshot,
   )
+  const [forceCrash, setForceCrash] = useState(false)
+
+  if (forceCrash) {
+    throw new Error('Manual crash trigger for ErrorBoundary validation.')
+  }
 
   useEffect(() => {
     localStorage.setItem(VIEW_STORAGE_KEY, String(showWorkflowView))
@@ -54,6 +59,15 @@ function App() {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {import.meta.env.DEV ? (
+          <button
+            type="button"
+            onClick={() => setForceCrash(true)}
+            style={{ position: 'absolute', top: 16, left: 16, zIndex: 20 }}
+          >
+            Trigger Error Boundary
+          </button>
+        ) : null}
         {showWorkflowView ? (
           <WorkflowView
             setShowWorkflowView={setShowWorkflowView}
