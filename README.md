@@ -1,4 +1,4 @@
-# Cato Project - Workflow Builder + Map Viewer
+# Carto Project - Workflow Builder + Map Viewer
 
 React + TypeScript assignment implementation using React Flow for workflow authoring and Deck.gl for map visualization.
 
