@@ -41,13 +41,16 @@ const SourceNode = ({ id, data, selected }: NodeProps<WorkflowNode>) => {
         style={{ width: 10, height: 10, borderRadius: '50%', background: '#111111' }}
       />
       <CardContent>
-        <Typography variant="subtitle2">Source</Typography>
+        <Typography variant="subtitle2" align="center">
+          Source
+        </Typography>
         <TextField
           size="small"
           label="url"
           value={draftUrl}
           onChange={(event) => handleUrlChange(event.target.value)}
           fullWidth
+          sx={{ mt: 1 }}
         />
       </CardContent>
     </Card>

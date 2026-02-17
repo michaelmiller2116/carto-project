@@ -12,7 +12,9 @@ const LayerNode = ({ selected }: NodeProps<WorkflowNode>) => {
         style={{ width: 10, height: 10, borderRadius: '50%', background: '#111111' }}
       />
       <CardContent>
-        <Typography variant="subtitle2">Layer</Typography>
+        <Typography variant="subtitle2" align="center">
+          Layer
+        </Typography>
       </CardContent>
     </Card>
   )

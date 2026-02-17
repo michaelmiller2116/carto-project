@@ -1,5 +1,5 @@
 import type { XYPosition } from '@xyflow/react'
-import { Typography } from '@mui/material'
+import { CardContent, TextField, Typography } from '@mui/material'
 
 import DraggableNode from './DraggableNode'
 import type { SidebarNodeType } from '../types'
@@ -11,7 +11,18 @@ type SourceSidebarNodeProps = {
 const SourceSidebarNode = ({ onDrop }: SourceSidebarNodeProps) => {
   return (
     <DraggableNode nodeType="source" onDrop={onDrop}>
-      <Typography>Source Node</Typography>
+      <CardContent>
+        <Typography variant="subtitle2" align="center">
+          Source
+        </Typography>
+        <TextField
+          size="small"
+          placeholder="url"
+          fullWidth
+          inputProps={{ readOnly: true, tabIndex: -1 }}
+          sx={{ pointerEvents: 'none' }}
+        />
+      </CardContent>
     </DraggableNode>
   )
 }

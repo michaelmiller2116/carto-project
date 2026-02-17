@@ -80,6 +80,15 @@ const theme = createTheme({
             color: '#b71c1c',
           },
         },
+        filledWarning: {
+          backgroundColor: '#fff8e1',
+          color: '#8a4b00',
+          border: '1px solid #ffb300',
+          borderRadius: '4px',
+          '& .MuiAlert-icon, & .MuiAlert-action': {
+            color: '#ff8f00',
+          },
+        },
       },
     },
     MuiCard: {
@@ -97,6 +106,11 @@ const theme = createTheme({
             transform: 'translateY(-1px)',
           },
         },
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        variant: 'contained',
       },
     },
   },

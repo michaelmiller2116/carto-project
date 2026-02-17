@@ -1,5 +1,7 @@
 import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react'
 import {
+  Background,
+  BackgroundVariant,
   ReactFlow,
   ReactFlowProvider,
   addEdge,
@@ -90,11 +92,17 @@ const WorkflowView = ({
           onConnect={onConnect}
           onEdgeDoubleClick={onEdgeDoubleClick}
           fitView
-        />
+        >
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={18}
+            size={1.2}
+            color="rgba(0, 0, 0, 0.24)"
+          />
+        </ReactFlow>
       </Box>
       <Button
         onClick={() => setShowWorkflowView(false)}
-        variant="contained"
         sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
       >
         Map

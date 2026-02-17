@@ -29,14 +29,21 @@ const getFilenameFromUrl = (url: string): string => {
 }
 
 const Mapview = ({ setShowWorkflowView, workflowSnapshot }: MapviewProps) => {
+  const [warningDismissed, setWarningDismissed] = useState(false)
   const [snackbar, setSnackbar] = useState<{ open: boolean; failedFilenames: string[] }>({
     open: false,
     failedFilenames: [],
   })
 
-  const handleBack = () => {
-    setShowWorkflowView(true)
-  }
+  const sourceLayerPairs = useMemo(
+    () => getOrderedSourceLayerPairs(workflowSnapshot),
+    [workflowSnapshot],
+  )
+  const hasLayerUrls = sourceLayerPairs.length > 0
+  const errorSnackbarMessage =
+    snackbar.failedFilenames.length <= 1
+      ? `Couldn't load ${snackbar.failedFilenames[0] ?? 'data file'}.`
+      : `Couldn't load ${snackbar.failedFilenames.join(', ')}.`
 
   const handleLoadError = useCallback((dataUrl: string, error: unknown) => {
     const filename = getFilenameFromUrl(dataUrl)
@@ -56,15 +63,12 @@ const Mapview = ({ setShowWorkflowView, workflowSnapshot }: MapviewProps) => {
     })
   }, [])
 
-  const snackbarMessage =
-    snackbar.failedFilenames.length <= 1
-      ? `Couldn't load ${snackbar.failedFilenames[0] ?? 'data file'}.`
-      : `Couldn't load ${snackbar.failedFilenames.join(', ')}.`
+  const handleWarningClose = useCallback(() => {
+    setWarningDismissed(true)
+  }, [])
 
   const layers = useMemo(() => {
-    const sourceToLayerPairs = getOrderedSourceLayerPairs(workflowSnapshot)
-
-    return sourceToLayerPairs.map(
+    return sourceLayerPairs.map(
       ({ dataUrl, sourceId, layerId }) =>
         new GeoJsonLayer({
           id: `workflow-layer-${layerId}-${sourceId}`,
@@ -85,7 +89,7 @@ const Mapview = ({ setShowWorkflowView, workflowSnapshot }: MapviewProps) => {
           },
         }),
     )
-  }, [handleLoadError, workflowSnapshot])
+  }, [handleLoadError, sourceLayerPairs])
 
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100vh' }}>
@@ -99,20 +103,29 @@ const Mapview = ({ setShowWorkflowView, workflowSnapshot }: MapviewProps) => {
         <MapLibre mapStyle="https://demotiles.maplibre.org/style.json" />
       </DeckGL>
       <Button
-        onClick={handleBack}
-        variant="contained"
+        onClick={() => setShowWorkflowView(true)}
         sx={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}
       >
         Back
       </Button>
       <Snackbar
+        open={!hasLayerUrls && !warningDismissed}
+        autoHideDuration={5000}
+        onClose={handleWarningClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert onClose={handleWarningClose} severity="warning">
+          No layer URLs found. Add a URL in the workflow to render a layer on the map.
+        </Alert>
+      </Snackbar>
+      <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Alert onClose={handleSnackbarClose} severity="error" variant="filled">
-          {snackbarMessage}
+          {errorSnackbarMessage}
         </Alert>
       </Snackbar>
     </Box>
