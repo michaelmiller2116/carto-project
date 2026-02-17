@@ -5,7 +5,7 @@ import MapLibre from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Alert, Box, Button, Snackbar } from '@mui/material'
 import type { WorkflowSnapshot } from '../workflow/types'
-import { getOrderedSourceLayerPairs } from './mapLayerPairs'
+import { getOrderedSourceLayerPairs } from '../map/mapLayerPairs'
 
 type MapviewProps = {
   setShowWorkflowView: Dispatch<SetStateAction<boolean>>
