@@ -14,7 +14,7 @@ import {
   type OnConnect,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 
 import NodeSidebar from '../workflow/NodeSidebar'
 import LayerNode from '../workflow/nodes/LayerNode'
@@ -24,6 +24,10 @@ import type { WorkflowEdge, WorkflowNode } from '../workflow/types'
 const nodeTypes = {
   layer: LayerNode,
   source: SourceNode,
+}
+
+type WorkflowViewProps = {
+  setShowWorkflowView: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const WORKFLOW_STORAGE_KEY = 'workflow'
@@ -52,7 +56,7 @@ const getInitialWorkflow = (): { nodes: WorkflowNode[]; edges: WorkflowEdge[] } 
   }
 }
 
-const WorkflowView = () => {
+const WorkflowView = ({ setShowWorkflowView }: WorkflowViewProps) => {
   const { nodes: initialNodes, edges: initialEdges } = getInitialWorkflow()
   const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(initialEdges)
@@ -151,6 +155,13 @@ const WorkflowView = () => {
           fitView
         />
       </Box>
+      <Button
+        onClick={() => setShowWorkflowView(false)}
+        variant="contained"
+        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+      >
+        Map
+      </Button>
     </ReactFlowProvider>
   )
 }
