@@ -16,7 +16,7 @@ const mockState = vi.hoisted(() => ({
   orderedPairs: vi.fn(),
 }))
 
-vi.mock('./mapLayerPairs', () => ({
+vi.mock('../map/mapLayerPairs', () => ({
   getOrderedSourceLayerPairs: (snapshot: WorkflowSnapshot) => mockState.orderedPairs(snapshot),
 }))
 
