@@ -21,7 +21,10 @@ vi.mock('@xyflow/react', () => ({
 }))
 
 const renderSourceNode = (data: { url?: string } = { url: '' }) => {
-  return render(<SourceNode id="source-1" data={data} selected={false} {...({} as never)} />)
+  const props = { id: 'source-1', data, selected: false } as unknown as Parameters<
+    typeof SourceNode
+  >[0]
+  return render(<SourceNode {...props} />)
 }
 
 describe('SourceNode', () => {

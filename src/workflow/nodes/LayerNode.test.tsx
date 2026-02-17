@@ -19,7 +19,8 @@ describe('LayerNode', () => {
   })
 
   it('renders layer label and target handle', () => {
-    render(<LayerNode selected={true} {...({} as never)} />)
+    const props = { selected: true } as unknown as Parameters<typeof LayerNode>[0]
+    render(<LayerNode {...props} />)
 
     const handle = screen.getByTestId('layer-handle')
     expect(screen.getByText('Layer')).toBeTruthy()
