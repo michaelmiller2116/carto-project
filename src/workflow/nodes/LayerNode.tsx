@@ -1,11 +1,12 @@
-import type { Node, NodeProps } from '@xyflow/react'
-
-// TODO: update this node to use the correct props
-type LayerNode = Node<{ number: number }, 'number'>
-
-// TODO: should use Draggable Node
-const LayerNode = ({ data }: NodeProps<LayerNode>) => {
-  return <div>A special number: {data.number}</div>
+import { Card, CardContent, Typography } from '@mui/material'
+const LayerNode = () => {
+  return (
+    <Card className="node">
+      <CardContent>
+        <Typography variant="subtitle2">Layer</Typography>
+      </CardContent>
+    </Card>
+  )
 }
 
 export default LayerNode

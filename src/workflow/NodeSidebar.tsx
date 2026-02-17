@@ -1,8 +1,11 @@
 import { useCallback } from 'react'
 import { useReactFlow, type XYPosition } from '@xyflow/react'
 import { nanoid } from 'nanoid'
+import { Box, Stack } from '@mui/material'
 
-import DraggableNode from './nodes/DraggableNode'
+import LayerSidebarNode from './nodes/LayerSidebarNode'
+import SourceSidebarNode from './nodes/SourceSidebarNode'
+import type { SidebarNodeType } from './types'
 
 const getId = () => `dndnode_${nanoid(12)}`
 
@@ -10,7 +13,7 @@ const NodeSidebar = () => {
   const { setNodes, screenToFlowPosition } = useReactFlow()
 
   const handleNodeDrop = useCallback(
-    (nodeType: string, screenPosition: XYPosition) => {
+    (nodeType: SidebarNodeType, screenPosition: XYPosition) => {
       const flow = document.querySelector('.react-flow')
       const flowRect = flow?.getBoundingClientRect()
       const isInFlow =
@@ -28,7 +31,7 @@ const NodeSidebar = () => {
           id: getId(),
           type: nodeType,
           position,
-          data: { label: `${nodeType} node` },
+          data: nodeType === 'source' ? { url: '' } : {},
         }
 
         setNodes((nds) => nds.concat(newNode))
@@ -38,18 +41,15 @@ const NodeSidebar = () => {
   )
 
   return (
-    <aside>
-      <div className="description">You can drag these nodes to the pane to create new nodes.</div>
-      <DraggableNode className="input" nodeType="input" onDrop={handleNodeDrop}>
-        Input Node
-      </DraggableNode>
-      <DraggableNode className="default" nodeType="default" onDrop={handleNodeDrop}>
-        Default Node
-      </DraggableNode>
-      <DraggableNode className="output" nodeType="output" onDrop={handleNodeDrop}>
-        Output Node
-      </DraggableNode>
-    </aside>
+    <Box
+      component="aside"
+      sx={{ width: 'fit-content', borderRight: '1px solid black', padding: 3 }}
+    >
+      <Stack gap={2}>
+        <LayerSidebarNode onDrop={handleNodeDrop} />
+        <SourceSidebarNode onDrop={handleNodeDrop} />
+      </Stack>
+    </Box>
   )
 }
 

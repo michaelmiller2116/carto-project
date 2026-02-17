@@ -68,6 +68,20 @@ const theme = createTheme({
       standard: 300,
     },
   },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          '&.node': {
+            border: '1px solid black',
+            minHeight: '150px',
+            width: '150px',
+            borderRadius: '4px',
+          },
+        },
+      },
+    },
+  },
 })
 
 export default theme

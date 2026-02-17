@@ -1,12 +1,15 @@
 import { useRef, useState } from 'react'
 import { useDraggable } from '@neodrag/react'
 import { type XYPosition } from '@xyflow/react'
+import { Card } from '@mui/material'
+
+import type { SidebarNodeType } from '../types'
 
 interface DraggableNodeProps {
   className?: string
   children: React.ReactNode
-  nodeType: string
-  onDrop: (nodeType: string, position: XYPosition) => void
+  nodeType: SidebarNodeType
+  onDrop: (nodeType: SidebarNodeType, position: XYPosition) => void
 }
 
 const DraggableNode = ({ className, children, nodeType, onDrop }: DraggableNodeProps) => {
@@ -32,9 +35,9 @@ const DraggableNode = ({ className, children, nodeType, onDrop }: DraggableNodeP
   })
 
   return (
-    <div ref={draggableRef} className={className}>
+    <Card ref={draggableRef} className={`node ${className}`}>
       {children}
-    </div>
+    </Card>
   )
 }
 

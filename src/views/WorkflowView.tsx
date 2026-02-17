@@ -11,7 +11,14 @@ import '@xyflow/react/dist/style.css'
 import { Box } from '@mui/material'
 
 import NodeSidebar from '../workflow/NodeSidebar'
+import LayerNode from '../workflow/nodes/LayerNode'
+import SourceNode from '../workflow/nodes/SourceNode'
 import type { WorkflowEdge, WorkflowNode } from '../workflow/types'
+
+const nodeTypes = {
+  layer: LayerNode,
+  source: SourceNode,
+}
 
 type WorkflowViewProps = {
   nodes: WorkflowNode[]
@@ -41,6 +48,7 @@ const WorkflowView = ({
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
