@@ -1,27 +1,16 @@
 import { GeoJsonLayer } from '@deck.gl/layers'
 import { DeckGL } from '@deck.gl/react'
-import type { Dispatch, SetStateAction } from 'react'
-import Map from 'react-map-gl/maplibre'
+import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import MapLibre from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Box, Button } from '@mui/material'
+import { Alert, Box, Button, Snackbar } from '@mui/material'
+import type { WorkflowSnapshot } from '../workflow/types'
+import { getOrderedSourceLayerPairs } from './mapLayerPairs'
 
 type MapviewProps = {
   setShowWorkflowView: Dispatch<SetStateAction<boolean>>
+  workflowSnapshot: WorkflowSnapshot
 }
-
-type BartFeatureProperties = {
-  name?: string
-  color?: string
-}
-
-type BartFeature = {
-  properties?: BartFeatureProperties
-}
-
-const BART_GEOJSON_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json'
-const SF_NEIGHBORHOODS_GEOJSON_URL =
-  'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/san-francisco.geojson'
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.19697830299943,
@@ -29,72 +18,85 @@ const INITIAL_VIEW_STATE = {
   zoom: 10,
 }
 
-const toRgb = (hex = ''): [number, number, number] => {
-  const normalizedHex = hex.replace('#', '')
-  const matches = normalizedHex.match(/[0-9a-f]{2}/gi)
-  if (!matches || matches.length < 3) return [0, 0, 0]
-  return [
-    Number.parseInt(matches[0], 16),
-    Number.parseInt(matches[1], 16),
-    Number.parseInt(matches[2], 16),
-  ]
+const getFilenameFromUrl = (url: string): string => {
+  try {
+    const pathname = new URL(url).pathname
+    const filename = pathname.split('/').pop()
+    return filename ? decodeURIComponent(filename) : 'data file'
+  } catch {
+    return 'data file'
+  }
 }
 
-const Mapview = ({ setShowWorkflowView }: MapviewProps) => {
+const Mapview = ({ setShowWorkflowView, workflowSnapshot }: MapviewProps) => {
+  const [snackbar, setSnackbar] = useState<{ open: boolean; failedFilenames: string[] }>({
+    open: false,
+    failedFilenames: [],
+  })
+
   const handleBack = () => {
     setShowWorkflowView(true)
   }
 
-  const bartLayer = new GeoJsonLayer<BartFeatureProperties>({
-    id: 'bart-geojson-layer',
-    data: BART_GEOJSON_URL,
-    stroked: false,
-    filled: true,
-    pointType: 'circle+text',
-    pickable: true,
-    autoHighlight: true,
-    getFillColor: [160, 160, 180, 200],
-    getLineColor: (feature: BartFeature) => toRgb(feature.properties?.color),
-    getText: (feature: BartFeature) => feature.properties?.name ?? '',
-    lineWidthUnits: 'pixels',
-    getLineWidth: 8,
-    lineWidthMinPixels: 8,
-    pointRadiusUnits: 'pixels',
-    getPointRadius: 10,
-    pointRadiusMinPixels: 10,
-    getTextSize: 8,
-  })
+  const handleLoadError = useCallback((dataUrl: string, error: unknown) => {
+    const filename = getFilenameFromUrl(dataUrl)
+    console.error(`[${filename}]`, error)
+    setSnackbar((previous) => ({
+      open: true,
+      failedFilenames: previous.failedFilenames.includes(filename)
+        ? previous.failedFilenames
+        : [...previous.failedFilenames, filename],
+    }))
+  }, [])
 
-  const sfNeighborhoodsLayer = new GeoJsonLayer({
-    id: 'sf-neighborhoods',
-    data: SF_NEIGHBORHOODS_GEOJSON_URL,
-    pickable: true,
-    stroked: true,
-    filled: true,
-    extruded: false,
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbar({
+      open: false,
+      failedFilenames: [],
+    })
+  }, [])
 
-    getFillColor: [200, 160, 255, 110],
-    getLineColor: [45, 45, 45, 255],
-    lineWidthUnits: 'pixels',
-    getLineWidth: 2,
-    lineWidthMinPixels: 2,
-    autoHighlight: true,
-    highlightColor: [255, 255, 255, 80],
-  })
+  const snackbarMessage =
+    snackbar.failedFilenames.length <= 1
+      ? `Couldn't load ${snackbar.failedFilenames[0] ?? 'data file'}.`
+      : `Couldn't load ${snackbar.failedFilenames.join(', ')}.`
+
+  const layers = useMemo(() => {
+    const sourceToLayerPairs = getOrderedSourceLayerPairs(workflowSnapshot)
+
+    return sourceToLayerPairs.map(
+      ({ dataUrl, sourceId, layerId }) =>
+        new GeoJsonLayer({
+          id: `workflow-layer-${layerId}-${sourceId}`,
+          data: dataUrl,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          lineWidthUnits: 'pixels',
+          getLineWidth: 4,
+          lineWidthMinPixels: 4,
+          pointRadiusUnits: 'pixels',
+          getPointRadius: 6,
+          pointRadiusMinPixels: 6,
+          getFillColor: [90, 90, 90, 90],
+          getLineColor: [30, 30, 30, 200],
+          onError: (error) => {
+            handleLoadError(dataUrl, error)
+          },
+        }),
+    )
+  }, [handleLoadError, workflowSnapshot])
 
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100vh' }}>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller
-        layers={[bartLayer, sfNeighborhoodsLayer]}
+        layers={layers}
         getTooltip={({ object }) => (object?.properties?.name ? object.properties.name : null)}
-        onViewStateChange={({ viewState }) => {
-          console.log('viewState', viewState)
-        }}
         style={{ position: 'absolute', top: '0', right: '0', bottom: '0', left: '0' }}
       >
-        <Map mapStyle="https://demotiles.maplibre.org/style.json" />
+        <MapLibre mapStyle="https://demotiles.maplibre.org/style.json" />
       </DeckGL>
       <Button
         onClick={handleBack}
@@ -103,6 +105,16 @@ const Mapview = ({ setShowWorkflowView }: MapviewProps) => {
       >
         Back
       </Button>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="error" variant="filled">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

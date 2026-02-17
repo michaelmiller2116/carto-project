@@ -1,14 +1,10 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
-  applyEdgeChanges,
-  applyNodeChanges,
   addEdge,
   useEdgesState,
   useNodesState,
-  type EdgeChange,
-  type NodeChange,
   type EdgeMouseHandler,
   type IsValidConnection,
   type OnConnect,
@@ -19,7 +15,7 @@ import { Box, Button } from '@mui/material'
 import NodeSidebar from '../workflow/NodeSidebar'
 import LayerNode from '../workflow/nodes/LayerNode'
 import SourceNode from '../workflow/nodes/SourceNode'
-import type { WorkflowEdge, WorkflowNode } from '../workflow/types'
+import type { WorkflowEdge, WorkflowNode, WorkflowSnapshot } from '../workflow/types'
 
 const nodeTypes = {
   layer: LayerNode,
@@ -27,82 +23,23 @@ const nodeTypes = {
 }
 
 type WorkflowViewProps = {
-  setShowWorkflowView: React.Dispatch<React.SetStateAction<boolean>>
+  setShowWorkflowView: Dispatch<SetStateAction<boolean>>
+  workflowSnapshot: WorkflowSnapshot
+  setWorkflowSnapshot: Dispatch<SetStateAction<WorkflowSnapshot>>
 }
 
-const WORKFLOW_STORAGE_KEY = 'workflow'
+const WorkflowView = ({
+  setShowWorkflowView,
+  workflowSnapshot,
+  setWorkflowSnapshot,
+}: WorkflowViewProps) => {
+  const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(workflowSnapshot.nodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(workflowSnapshot.edges)
 
-const getInitialWorkflow = (): { nodes: WorkflowNode[]; edges: WorkflowEdge[] } => {
-  if (typeof window === 'undefined') {
-    // TODO: better error handling
-    return { nodes: [], edges: [] }
-  }
-
-  try {
-    const rawWorkflow = localStorage.getItem(WORKFLOW_STORAGE_KEY)
-    if (!rawWorkflow) return { nodes: [], edges: [] }
-
-    const parsedWorkflow = JSON.parse(rawWorkflow)
-    const nodes = Array.isArray(parsedWorkflow.nodes)
-      ? (parsedWorkflow.nodes as WorkflowNode[])
-      : []
-    const edges = Array.isArray(parsedWorkflow.edges)
-      ? (parsedWorkflow.edges as WorkflowEdge[])
-      : []
-
-    return { nodes, edges }
-  } catch {
-    return { nodes: [], edges: [] }
-  }
-}
-
-const WorkflowView = ({ setShowWorkflowView }: WorkflowViewProps) => {
-  const { nodes: initialNodes, edges: initialEdges } = getInitialWorkflow()
-  const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(initialEdges)
-
-  const persistToLocalStorage = useCallback(
-    (nextNodes = nodes, nextEdges = edges) => {
-      localStorage.setItem(
-        WORKFLOW_STORAGE_KEY,
-        JSON.stringify({ nodes: nextNodes, edges: nextEdges }),
-      )
-    },
-    [edges, nodes],
-  )
-
-  const handleNodesChange = useCallback(
-    (changes: NodeChange<WorkflowNode>[]) => {
-      const nextNodes = applyNodeChanges(changes, nodes)
-      onNodesChange(changes)
-
-      const change = changes[0]
-      if (!change) return
-
-      const isDragMove =
-        change.type === 'position' && 'dragging' in change && change.dragging === true
-      // ignoring dimensions here as I am not allowing dimension change of a node
-      const shouldPersist = change.type !== 'dimensions' && !isDragMove
-
-      if (shouldPersist) {
-        persistToLocalStorage(nextNodes, edges)
-      }
-    },
-    [edges, nodes, onNodesChange, persistToLocalStorage],
-  )
-
-  const handleEdgesChange = useCallback(
-    (changes: EdgeChange<WorkflowEdge>[]) => {
-      const nextEdges = applyEdgeChanges(changes, edges)
-      onEdgesChange(changes)
-
-      const change = changes[0]
-      if (!change) return
-
-      persistToLocalStorage(nodes, nextEdges)
-    },
-    [edges, nodes, onEdgesChange, persistToLocalStorage],
-  )
+  useEffect(() => {
+    if (nodes.some((node) => node.dragging)) return
+    setWorkflowSnapshot({ nodes, edges })
+  }, [edges, nodes, setWorkflowSnapshot])
 
   const isValidConnection: IsValidConnection = useCallback(
     (connection) => {
@@ -127,16 +64,16 @@ const WorkflowView = ({ setShowWorkflowView }: WorkflowViewProps) => {
       if (!isValidConnection(params)) return
       const nextEdges = addEdge(params, edges)
       setEdges(nextEdges)
-      persistToLocalStorage(nodes, nextEdges)
     },
-    [edges, isValidConnection, nodes, persistToLocalStorage, setEdges],
+    [edges, isValidConnection, setEdges],
   )
 
   const onEdgeDoubleClick: EdgeMouseHandler<WorkflowEdge> = useCallback(
     (_, edge) => {
-      setEdges((previousEdges) => previousEdges.filter((currentEdge) => currentEdge.id !== edge.id))
+      const nextEdges = edges.filter((currentEdge) => currentEdge.id !== edge.id)
+      setEdges(nextEdges)
     },
-    [setEdges],
+    [edges, setEdges],
   )
 
   return (
@@ -148,8 +85,8 @@ const WorkflowView = ({ setShowWorkflowView }: WorkflowViewProps) => {
           edges={edges}
           nodeTypes={nodeTypes}
           isValidConnection={isValidConnection}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={handleEdgesChange}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onEdgeDoubleClick={onEdgeDoubleClick}
           fitView

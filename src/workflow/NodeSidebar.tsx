@@ -32,13 +32,6 @@ const NodeSidebar = () => {
           nodeType === 'source'
             ? {
                 url: '',
-                onUrlChange: (url: string) => {
-                  setNodes((nodes) =>
-                    nodes.map((node) =>
-                      node.id === nodeId ? { ...node, data: { ...node.data, url } } : node,
-                    ),
-                  )
-                },
               }
             : {}
 
@@ -49,7 +42,7 @@ const NodeSidebar = () => {
           data,
         }
 
-        setNodes((nds) => nds.concat(newNode))
+        setNodes((nodes) => nodes.concat(newNode))
       }
     },
     [setNodes, screenToFlowPosition],

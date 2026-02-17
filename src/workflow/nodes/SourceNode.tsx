@@ -1,10 +1,11 @@
-import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { Card, CardContent, TextField, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 
 import type { WorkflowNode } from '../types'
 
-const SourceNode = ({ data, selected }: NodeProps<WorkflowNode>) => {
+const SourceNode = ({ id, data, selected }: NodeProps<WorkflowNode>) => {
+  const { setNodes } = useReactFlow()
   const [draftUrl, setDraftUrl] = useState<string>(data.url ?? '')
   const debounceTimeoutRef = useRef<number | null>(null)
 
@@ -24,7 +25,11 @@ const SourceNode = ({ data, selected }: NodeProps<WorkflowNode>) => {
     }
 
     debounceTimeoutRef.current = window.setTimeout(() => {
-      data.onUrlChange?.(value)
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id ? { ...node, data: { ...node.data, url: value } } : node,
+        ),
+      )
     }, 300)
   }
 

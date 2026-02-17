@@ -69,6 +69,19 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiAlert: {
+      styleOverrides: {
+        filledError: {
+          backgroundColor: '#fff4f4',
+          color: '#b71c1c',
+          border: '1px solid #ff3d00',
+          borderRadius: '4px',
+          '& .MuiAlert-icon, & .MuiAlert-action': {
+            color: '#b71c1c',
+          },
+        },
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: {
