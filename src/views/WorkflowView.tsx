@@ -1,5 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react'
 import {
+  Background,
+  BackgroundVariant,
   ReactFlow,
   ReactFlowProvider,
   addEdge,
@@ -10,23 +12,36 @@ import {
   type OnConnect,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 
 import NodeSidebar from '../workflow/NodeSidebar'
 import LayerNode from '../workflow/nodes/LayerNode'
 import SourceNode from '../workflow/nodes/SourceNode'
-import type { WorkflowEdge, WorkflowNode } from '../workflow/types'
+import type { WorkflowEdge, WorkflowNode, WorkflowSnapshot } from '../workflow/types'
 
 const nodeTypes = {
   layer: LayerNode,
   source: SourceNode,
 }
 
-const WorkflowView = () => {
-  const initialNodes: WorkflowNode[] = []
-  const initialEdges: WorkflowEdge[] = []
-  const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(initialEdges)
+type WorkflowViewProps = {
+  setShowWorkflowView: Dispatch<SetStateAction<boolean>>
+  workflowSnapshot: WorkflowSnapshot
+  setWorkflowSnapshot: Dispatch<SetStateAction<WorkflowSnapshot>>
+}
+
+const WorkflowView = ({
+  setShowWorkflowView,
+  workflowSnapshot,
+  setWorkflowSnapshot,
+}: WorkflowViewProps) => {
+  const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(workflowSnapshot.nodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(workflowSnapshot.edges)
+
+  useEffect(() => {
+    if (nodes.some((node) => node.dragging)) return
+    setWorkflowSnapshot({ nodes, edges })
+  }, [edges, nodes, setWorkflowSnapshot])
 
   const isValidConnection: IsValidConnection = useCallback(
     (connection) => {
@@ -49,16 +64,18 @@ const WorkflowView = () => {
   const onConnect: OnConnect = useCallback(
     (params) => {
       if (!isValidConnection(params)) return
-      setEdges((previousEdges) => addEdge(params, previousEdges))
+      const nextEdges = addEdge(params, edges)
+      setEdges(nextEdges)
     },
-    [isValidConnection, setEdges],
+    [edges, isValidConnection, setEdges],
   )
 
   const onEdgeDoubleClick: EdgeMouseHandler<WorkflowEdge> = useCallback(
     (_, edge) => {
-      setEdges((previousEdges) => previousEdges.filter((currentEdge) => currentEdge.id !== edge.id))
+      const nextEdges = edges.filter((currentEdge) => currentEdge.id !== edge.id)
+      setEdges(nextEdges)
     },
-    [setEdges],
+    [edges, setEdges],
   )
 
   return (
@@ -75,8 +92,21 @@ const WorkflowView = () => {
           onConnect={onConnect}
           onEdgeDoubleClick={onEdgeDoubleClick}
           fitView
-        />
+        >
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={18}
+            size={1.2}
+            color="rgba(0, 0, 0, 0.24)"
+          />
+        </ReactFlow>
       </Box>
+      <Button
+        onClick={() => setShowWorkflowView(false)}
+        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+      >
+        Map
+      </Button>
     </ReactFlowProvider>
   )
 }

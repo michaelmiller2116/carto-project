@@ -35,7 +35,17 @@ const DraggableNode = ({ className, children, nodeType, onDrop }: DraggableNodeP
   })
 
   return (
-    <Card ref={draggableRef} className={`node ${className}`}>
+    <Card
+      ref={draggableRef}
+      className={`node ${className}`}
+      sx={{
+        cursor: 'grab',
+        userSelect: 'none',
+        '&:active': {
+          cursor: 'grabbing',
+        },
+      }}
+    >
       {children}
     </Card>
   )

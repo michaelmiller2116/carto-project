@@ -69,6 +69,28 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiAlert: {
+      styleOverrides: {
+        filledError: {
+          backgroundColor: '#fff4f4',
+          color: '#b71c1c',
+          border: '1px solid #ff3d00',
+          borderRadius: '4px',
+          '& .MuiAlert-icon, & .MuiAlert-action': {
+            color: '#b71c1c',
+          },
+        },
+        filledWarning: {
+          backgroundColor: '#fff8e1',
+          color: '#8a4b00',
+          border: '1px solid #ffb300',
+          borderRadius: '4px',
+          '& .MuiAlert-icon, & .MuiAlert-action': {
+            color: '#ff8f00',
+          },
+        },
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: {
@@ -84,6 +106,11 @@ const theme = createTheme({
             transform: 'translateY(-1px)',
           },
         },
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        variant: 'contained',
       },
     },
   },

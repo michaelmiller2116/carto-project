@@ -32,13 +32,6 @@ const NodeSidebar = () => {
           nodeType === 'source'
             ? {
                 url: '',
-                onUrlChange: (url: string) => {
-                  setNodes((nodes) =>
-                    nodes.map((node) =>
-                      node.id === nodeId ? { ...node, data: { ...node.data, url } } : node,
-                    ),
-                  )
-                },
               }
             : {}
 
@@ -49,7 +42,7 @@ const NodeSidebar = () => {
           data,
         }
 
-        setNodes((nds) => nds.concat(newNode))
+        setNodes((nodes) => nodes.concat(newNode))
       }
     },
     [setNodes, screenToFlowPosition],
@@ -58,7 +51,14 @@ const NodeSidebar = () => {
   return (
     <Box
       component="aside"
-      sx={{ width: 'fit-content', borderRight: '1px solid black', padding: 3 }}
+      sx={(theme) => ({
+        width: 'fit-content',
+        padding: 3,
+        borderRight: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: '6px 0 20px rgba(0, 0, 0, 0.14)',
+        zIndex: 4,
+      })}
     >
       <Stack gap={2}>
         <LayerSidebarNode onDrop={handleNodeDrop} />

@@ -4,8 +4,12 @@ export type SidebarNodeType = 'layer' | 'source'
 
 export type WorkflowNodeData = {
   url?: string
-  onUrlChange?: (url: string) => void
 }
 
 export type WorkflowNode = Node<WorkflowNodeData>
 export type WorkflowEdge = Edge
+
+export type WorkflowSnapshot = {
+  nodes: WorkflowNode[]
+  edges: WorkflowEdge[]
+}

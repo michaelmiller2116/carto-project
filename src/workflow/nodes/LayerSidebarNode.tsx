@@ -1,5 +1,5 @@
 import type { XYPosition } from '@xyflow/react'
-import { Typography } from '@mui/material'
+import { CardContent, Typography } from '@mui/material'
 
 import DraggableNode from './DraggableNode'
 import type { SidebarNodeType } from '../types'
@@ -11,7 +11,11 @@ type LayerSidebarNodeProps = {
 const LayerSidebarNode = ({ onDrop }: LayerSidebarNodeProps) => {
   return (
     <DraggableNode nodeType="layer" onDrop={onDrop}>
-      <Typography>Layer Node</Typography>
+      <CardContent>
+        <Typography variant="subtitle2" align="center">
+          Layer
+        </Typography>
+      </CardContent>
     </DraggableNode>
   )
 }
