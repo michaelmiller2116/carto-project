@@ -295,6 +295,7 @@ data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.
 
 ## Known Limitations / Future Improvements
 
+- Very very basic input for url without validation, but should be good for this take home
 - Intersection node (bonus) is not implemented.
 - Drag cursor polish in sidebar drag interaction can be improved.
 - Runtime URL validation and richer fetch error diagnostics could be expanded.
