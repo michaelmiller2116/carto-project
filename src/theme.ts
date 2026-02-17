@@ -78,6 +78,11 @@ const theme = createTheme({
             width: '150px',
             borderRadius: '4px',
           },
+          '&.node.selected': {
+            borderColor: '#1976d2',
+            boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.25)',
+            transform: 'translateY(-1px)',
+          },
         },
       },
     },

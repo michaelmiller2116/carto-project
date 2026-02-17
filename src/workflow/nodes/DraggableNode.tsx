@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useDraggable } from '@neodrag/react'
-import { type XYPosition } from '@xyflow/react'
+import type { XYPosition } from '@xyflow/react'
 import { Card } from '@mui/material'
 
 import type { SidebarNodeType } from '../types'

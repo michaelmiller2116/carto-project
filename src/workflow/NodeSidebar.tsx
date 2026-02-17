@@ -5,7 +5,7 @@ import { Box, Stack } from '@mui/material'
 
 import LayerSidebarNode from './nodes/LayerSidebarNode'
 import SourceSidebarNode from './nodes/SourceSidebarNode'
-import type { SidebarNodeType } from './types'
+import type { SidebarNodeType, WorkflowNodeData } from './types'
 
 const getId = () => `dndnode_${nanoid(12)}`
 
@@ -26,12 +26,27 @@ const NodeSidebar = () => {
       // Create a new node and add it to the flow
       if (isInFlow) {
         const position = screenToFlowPosition(screenPosition)
+        const nodeId = getId()
+
+        const data: WorkflowNodeData =
+          nodeType === 'source'
+            ? {
+                url: '',
+                onUrlChange: (url: string) => {
+                  setNodes((nodes) =>
+                    nodes.map((node) =>
+                      node.id === nodeId ? { ...node, data: { ...node.data, url } } : node,
+                    ),
+                  )
+                },
+              }
+            : {}
 
         const newNode = {
-          id: getId(),
+          id: nodeId,
           type: nodeType,
           position,
-          data: nodeType === 'source' ? { url: '' } : {},
+          data,
         }
 
         setNodes((nds) => nds.concat(newNode))

@@ -3,9 +3,11 @@ import {
   ReactFlow,
   ReactFlowProvider,
   addEdge,
+  useEdgesState,
+  useNodesState,
+  type EdgeMouseHandler,
+  type IsValidConnection,
   type OnConnect,
-  type OnNodesChange,
-  type OnEdgesChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Box } from '@mui/material'
@@ -20,24 +22,42 @@ const nodeTypes = {
   source: SourceNode,
 }
 
-type WorkflowViewProps = {
-  nodes: WorkflowNode[]
-  edges: WorkflowEdge[]
-  setShowWorkflowView: React.Dispatch<React.SetStateAction<boolean>>
-  setEdges: React.Dispatch<React.SetStateAction<WorkflowEdge[]>>
-  onNodesChange: OnNodesChange<WorkflowNode>
-  onEdgesChange: OnEdgesChange<WorkflowEdge>
-}
+const WorkflowView = () => {
+  const initialNodes: WorkflowNode[] = []
+  const initialEdges: WorkflowEdge[] = []
+  const [nodes, , onNodesChange] = useNodesState<WorkflowNode>(initialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdge>(initialEdges)
 
-const WorkflowView = ({
-  nodes,
-  edges,
-  setEdges,
-  onNodesChange,
-  onEdgesChange,
-}: WorkflowViewProps) => {
+  const isValidConnection: IsValidConnection = useCallback(
+    (connection) => {
+      const { source, target } = connection
+      if (!source || !target || source === target) return false
+
+      const sourceNode = nodes.find((node) => node.id === source)
+      const targetNode = nodes.find((node) => node.id === target)
+
+      if (sourceNode?.type !== 'source' || targetNode?.type !== 'layer') return false
+
+      const sourceAlreadyConnected = edges.some((edge) => edge.source === source)
+      const targetAlreadyConnected = edges.some((edge) => edge.target === target)
+
+      return !sourceAlreadyConnected && !targetAlreadyConnected
+    },
+    [edges, nodes],
+  )
+
   const onConnect: OnConnect = useCallback(
-    (params) => setEdges((previousEdges) => addEdge(params, previousEdges)),
+    (params) => {
+      if (!isValidConnection(params)) return
+      setEdges((previousEdges) => addEdge(params, previousEdges))
+    },
+    [isValidConnection, setEdges],
+  )
+
+  const onEdgeDoubleClick: EdgeMouseHandler<WorkflowEdge> = useCallback(
+    (_, edge) => {
+      setEdges((previousEdges) => previousEdges.filter((currentEdge) => currentEdge.id !== edge.id))
+    },
     [setEdges],
   )
 
@@ -49,9 +69,11 @@ const WorkflowView = ({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          isValidConnection={isValidConnection}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeDoubleClick={onEdgeDoubleClick}
           fitView
         />
       </Box>
