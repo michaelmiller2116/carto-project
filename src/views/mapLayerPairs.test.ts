@@ -5,6 +5,7 @@ import type { WorkflowSnapshot } from '../workflow/types'
 
 describe('getOrderedSourceLayerPairs', () => {
   it('excludes pairs with empty or missing source URLs', () => {
+    // Edge exists, but empty URL makes the pair unusable for map rendering.
     const snapshot: WorkflowSnapshot = {
       nodes: [
         { id: 'source-1', type: 'source', position: { x: 0, y: 0 }, data: { url: '' } },
@@ -18,6 +19,7 @@ describe('getOrderedSourceLayerPairs', () => {
   })
 
   it('returns valid pairs sorted by layer y position (top to bottom)', () => {
+    // Layer vertical order determines draw order on the map.
     const snapshot: WorkflowSnapshot = {
       nodes: [
         {

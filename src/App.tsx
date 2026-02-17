@@ -7,7 +7,7 @@ import type { WorkflowEdge, WorkflowNode, WorkflowSnapshot } from './workflow/ty
 import WorkflowView from './views/WorkflowView'
 import Mapview from './views/Mapview'
 
-const VIEW_STORAGE_KEY = 'activeView'
+const VIEW_STORAGE_KEY = 'showWorkflowView'
 const WORKFLOW_STORAGE_KEY = 'workflow'
 
 const getInitialView = (): boolean => {
